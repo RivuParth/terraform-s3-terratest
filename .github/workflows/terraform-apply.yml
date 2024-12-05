@@ -40,9 +40,9 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update -y
-        sudo apt-get install -y unzip
-        curl -sL https://github.com/gruntwork-io/terratest/releases/download/v0.39.0/terratest_linux_amd64.zip -o terratest.zip
-        unzip terratest.zip
+        sudo apt-get install -y curl
+        curl -sL https://github.com/gruntwork-io/terratest/releases/download/v0.39.0/terratest-linux-amd64 -o terratest
+        chmod +x terratest
         sudo mv terratest /usr/local/bin
 
     - name: Terraform Init
