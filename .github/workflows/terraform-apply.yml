@@ -27,7 +27,7 @@ jobs:
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v2
       with:
-        terraform_version: 1.4.0  # Specify the Terraform version you need
+        terraform_version: 1.4.0  # Specify the Terraform 
 
     - name: Cache Terraform init
       uses: actions/cache@v2
