@@ -1,44 +1,39 @@
 package test
 
 import (
-    "testing"
+	"testing"
 
-    "github.com/aws/aws-sdk-go/aws"
-    "github.com/aws/aws-sdk-go/aws/session"
-    "github.com/aws/aws-sdk-go/service/s3"
-    "github.com/gruntwork-io/terratest/modules/terraform"
-    "github.com/stretchr/testify/assert"
+	"github.com/gruntwork-io/terratest/modules/aws"
+	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestS3BucketModule(t *testing.T) {
-    t.Parallel()
+	t.Parallel()
 
-    // Define the bucket name
-    bucketName := "my-terratest-bucket2"
+	// Define Terraform options
+	terraformOptions := &terraform.Options{
+		TerraformDir: "../modules/s3", // Update path to your Terraform module
+		Vars: map[string]interface{}{
+			"bucket_name": "my-terratest-bucket66", // Match the bucket name used in your apply
+		},
+	}
 
-    // Define Terraform options
-    terraformOptions := &terraform.Options{
-        TerraformDir: "../modules/s3", // Path to your Terraform module
+	// Clean up resources after the test
+	defer terraform.Destroy(t, terraformOptions)
 
-        Vars: map[string]interface{}{
-            "bucket_name": bucketName,
-        },
-    }
+	// Run Terraform init and apply
+	terraform.InitAndApply(t, terraformOptions)
 
-    // Skip terraform apply since the bucket already exists
-    terraform.Init(t, terraformOptions)
+	// Retrieve Terraform outputs
+	bucketID := terraform.Output(t, terraformOptions, "bucket_id")
+	bucketARN := terraform.Output(t, terraformOptions, "bucket_arn")
 
-    // Validate that the bucket exists in AWS
-    sess, err := session.NewSession(&aws.Config{
-        Region: aws.String("us-east-1"), // Replace with your AWS region
-    })
-    assert.NoError(t, err)
+	// Validate the bucket exists in AWS
+	awsRegion := "us-east-1" // Replace with your AWS region
+	assert.True(t, aws.S3BucketExists(t, awsRegion, bucketID))
 
-    s3Svc := s3.New(sess)
-    _, err = s3Svc.HeadBucket(&s3.HeadBucketInput{
-        Bucket: aws.String(bucketName),
-    })
-
-    // Assert that the bucket exists
-    assert.NoError(t, err)
+	// Validate the bucket ARN matches the expected format
+	expectedARN := "arn:aws:s3:::" + bucketID
+	assert.Equal(t, expectedARN, bucketARN)
 }
