@@ -67,15 +67,17 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: '1.18'  # Specify the Go version needed for Terratest
+        go-version: '1.18'  
 
     - name: Install dependencies
       run: |
-        go mod tidy
+        cd test
+        go get github.com/gruntwork-io/terratest/modules/aws    
         go get github.com/gruntwork-io/terratest/modules/terraform
         go get github.com/stretchr/testify/assert
 
     - name: Run Terratest
       run: |
         cd test
+        go mod init terraform
         go test -v
