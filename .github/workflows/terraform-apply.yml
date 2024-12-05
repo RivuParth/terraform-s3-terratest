@@ -69,6 +69,11 @@ jobs:
       with:
         go-version: '1.18'  
 
+    - name: Initialize Go module
+      run: |
+        cd test
+        go mod init terraform  # Initialize Go module
+
     - name: Install dependencies
       run: |
         cd test
@@ -79,5 +84,4 @@ jobs:
     - name: Run Terratest
       run: |
         cd test
-        go mod init terraform
         go test -v
