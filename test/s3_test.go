@@ -17,11 +17,9 @@ func TestS3BucketModule(t *testing.T) {
 		TerraformDir: "../s3", 
 		// Variables for the Terraform module
 		Vars: map[string]interface{}{
-			"bucket_name":      "your-terratest-004",  
+			"bucket_name":      "your-terratest-404",  
 			"enable_versioning": true,               
-			"tags": map[string]string{
-				"Environment": "Test",
-			},
+			
 		},
 		// Ensure Terraform doesn't ask for user input during apply
 		NoColor: true,
