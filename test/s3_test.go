@@ -18,7 +18,7 @@ func TestS3BucketModule(t *testing.T) {
 		TerraformDir: "../s3",  // Modify the path to your Terraform directory if needed
 		// Variables for the Terraform module
 		Vars: map[string]interface{}{
-			"bucket_name":      "my-terratest-0000",  // Make sure the bucket name is unique
+			"bucket_name":      "my-terratest-00000",  // Make sure the bucket name is unique
 			"enable_versioning": true,                 // Enable versioning on the bucket
 			
 		},
