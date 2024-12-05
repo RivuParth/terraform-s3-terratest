@@ -46,7 +46,9 @@ jobs:
         sudo mv terratest /usr/local/bin
 
     - name: Terraform Init
-      run: terraform init
+      run: | 
+        cd s3
+        terraform init
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
