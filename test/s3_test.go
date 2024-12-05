@@ -19,10 +19,8 @@ func TestS3BucketModule(t *testing.T) {
 		// Variables for the Terraform module
 		Vars: map[string]interface{}{
 			"bucket_name":      "my-terratest-0000",  // Make sure the bucket name is unique
-			"enable_versioning": true,                 // Enable versioning on the bucket
-			"tags": map[string]string{
-				"Environment": "Test",
-			},
+			"enable_versioning": true             // Enable versioning on the bucket
+			
 		},
 		// Ensure Terraform doesn't ask for user input during apply
 		NoColor: true,

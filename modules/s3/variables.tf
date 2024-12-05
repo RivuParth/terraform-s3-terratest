@@ -9,6 +9,7 @@ variable "tags" {
   default     = {}
 }
 
+
 variable "force_destroy" {
   description = "Allow force deletion of bucket (including objects)"
   type        = bool
