@@ -1,4 +1,4 @@
-bucket_name = "my-terratest-0000"
+bucket_name = "my-terratest-bucket2"
 enable_versioning = true
 tags = {
   "Environment" = "Test"
