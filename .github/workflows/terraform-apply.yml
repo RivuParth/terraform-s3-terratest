@@ -72,7 +72,7 @@ jobs:
     - name: Initialize Go module
       run: |
         cd test
-        go mod init terraform  # Initialize Go module
+        go mod init terraform  
 
     - name: Install dependencies
       run: |

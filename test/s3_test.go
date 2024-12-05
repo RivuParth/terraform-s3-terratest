@@ -2,22 +2,31 @@ package test
 
 import (
 	"testing"
-
-	"github.com/gruntwork-io/terratest/modules/aws"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 func TestS3BucketModule(t *testing.T) {
 	t.Parallel()
 
-	// Define Terraform options
 	terraformOptions := &terraform.Options{
-		TerraformDir: "../modules/s3", // Update path to your Terraform module
+		// Path to the Terraform code
+		TerraformDir: "../s3", 
+		// Variables for the Terraform module
 		Vars: map[string]interface{}{
-			"bucket_name": "my-terratest-bucket66", // Match the bucket name used in your apply
+			"bucket_name":      "your-terratest-004",  
+			"enable_versioning": true,               
+			"tags": map[string]string{
+				"Environment": "Test",
+			},
 		},
+		// Ensure Terraform doesn't ask for user input during apply
+		NoColor: true,
 	}
+	
 
 	// Clean up resources after the test
 	defer terraform.Destroy(t, terraformOptions)
@@ -25,15 +34,32 @@ func TestS3BucketModule(t *testing.T) {
 	// Run Terraform init and apply
 	terraform.InitAndApply(t, terraformOptions)
 
-	// Retrieve Terraform outputs
-	bucketID := terraform.Output(t, terraformOptions, "bucket_id")
-	bucketARN := terraform.Output(t, terraformOptions, "bucket_arn")
+	// Get the bucket ID and ARN from the Terraform output
+	bucketId := terraform.Output(t, terraformOptions, "bucket_id")
+	assert.NotEmpty(t, bucketId, "Bucket ID should not be empty")
 
-	// Validate the bucket exists in AWS
-	awsRegion := "us-east-1" // Replace with your AWS region
-	assert.True(t, aws.S3BucketExists(t, awsRegion, bucketID))
+	bucketArn := terraform.Output(t, terraformOptions, "bucket_arn")
+	assert.Contains(t, bucketArn, "arn:aws:s3:::"+bucketId, "Bucket ARN should contain the correct bucket ID")
 
-	// Validate the bucket ARN matches the expected format
-	expectedARN := "arn:aws:s3:::" + bucketID
-	assert.Equal(t, expectedARN, bucketARN)
+	// Verify the bucket versioning status
+	// versioningStatus := terraform.Output(t, terraformOptions, "bucket_versioning_status")
+	// assert.Equal(t, "Enabled", versioningStatus, "Versioning should be enabled")
+
+	// Optionally, use AWS SDK to verify the S3 bucket's location
+	// Create a new AWS session
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-east-1"),
+	})
+	if err != nil {
+		t.Fatalf("Failed to create AWS session: %v", err)
+	}
+
+	// Create an S3 service client
+	s3Client := s3.New(sess)
+
+	// Get bucket location
+	_, err = s3Client.GetBucketLocation(&s3.GetBucketLocationInput{
+		Bucket: aws.String(bucketId),
+	})
+	assert.NoError(t, err, "Error checking S3 bucket location")
 }
