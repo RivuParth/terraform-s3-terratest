@@ -53,7 +53,8 @@ jobs:
     - name: Terraform Apply
       run: |
         cd s3
-        terraform apply -auto-approve
+        terraform apply -var bucket_name="my-terratest-bucket2" -auto-approve
+      working-directory: ./modules/s3 
 
   terratest:
     name: Run Terratest
