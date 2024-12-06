@@ -1,3 +1,3 @@
-bucket_name = "your-terratest-4040"
+bucket_name = "my-terratest-4040"
 enable_versioning = true
 
