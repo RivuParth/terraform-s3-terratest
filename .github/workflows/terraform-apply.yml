@@ -67,6 +67,9 @@ jobs:
         with:
           name: terraform-state
 
+      - name: Move Terraform State
+        run: mv terraform.tfstate s3/
+
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
@@ -75,12 +78,12 @@ jobs:
       - name: Install dependencies
         run: |
           cd test
-          go mod init terraform
+          go mod tidy
           go get github.com/gruntwork-io/terratest/modules/aws    
           go get github.com/gruntwork-io/terratest/modules/terraform
           go get github.com/stretchr/testify/assert
 
-      - name: Set up AWS credentials
+      - name: Set up AWS environment variables
         run: |
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
