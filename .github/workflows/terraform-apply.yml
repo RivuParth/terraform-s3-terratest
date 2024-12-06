@@ -55,6 +55,20 @@ jobs:
         cd s3
         terraform apply -auto-approve
 
+    - name: Save Terraform State
+      uses: actions/upload-artifact@v3
+      with:
+          name: terraform-state
+          path: terraform.tfstate
+  
+    - name: Wait for AWS Propagation
+      run: sleep 30
+  
+    - name: Restore Terraform State
+      uses: actions/download-artifact@v3
+      with:
+          name: terraform-state
+
   terratest:
     name: Run Terratest
     runs-on: ubuntu-latest

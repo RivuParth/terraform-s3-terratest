@@ -1,5 +1,3 @@
-bucket_name = "your-terratest-404"
+bucket_name = "your-terratest-4040"
 enable_versioning = true
-tags = {
-  "Environment" = "Test"
-}
+
