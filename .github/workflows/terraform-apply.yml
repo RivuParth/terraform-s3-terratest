@@ -54,6 +54,7 @@ jobs:
       run: |
         cd s3
         terraform apply -auto-approve
+        terraform destroy -auto-approve
 
   terratest:
     name: Run Terratest
