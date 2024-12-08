@@ -38,7 +38,7 @@ func TestS3BucketModule(t *testing.T) {
 
 	// Run validations
 	bucketName := terraform.Output(t, terraformOptions, "bucket_name")
-	assert.Equal(t, "partha-terratest-505", bucketName)
+	assert.Equal(t, "partha-terratest-5050", bucketName)
 
 	versioningEnabled := terraform.Output(t, terraformOptions, "versioning_enabled")
 	assert.Equal(t, "true", versioningEnabled)
