@@ -10,6 +10,3 @@ output "bucket_name" {
   value = aws_s3_bucket.this.bucket
 }
 
-output "versioning_enabled" {
-  value = aws_s3_bucket_versioning.this.enabled
-}
