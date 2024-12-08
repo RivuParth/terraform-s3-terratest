@@ -14,53 +14,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+    - name: Set up AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1  # Choose your desired AWS region
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.4.0
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.4.0  # Specify the Terraform 
 
-      - name: Cache Terraform init
-        uses: actions/cache@v2
-        with:
-          path: ~/.terraform
-          key: ${{ runner.os }}-terraform-${{ hashFiles('**/*.tf') }}
-          restore-keys: |
-            ${{ runner.os }}-terraform-
+    - name: Cache Terraform init
+      uses: actions/cache@v2
+      with:
+        path: ~/.terraform
+        key: ${{ runner.os }}-terraform-${{ hashFiles('**/*.tf') }}
+        restore-keys: |
+          ${{ runner.os }}-terraform-
 
-      - name: Terraform Init
-        run: |
-          cd s3
-          terraform init
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y curl
+        curl -sL https://github.com/gruntwork-io/terratest/releases/download/v0.39.0/terratest-linux-amd64 -o terratest
+        chmod +x terratest
+        sudo mv terratest /usr/local/bin
 
-      - name: Terraform Apply
-        run: |
-          cd s3
-          terraform apply -auto-approve
+    - name: Terraform Init
+      run: | 
+        cd s3
+        terraform init
 
-      - name: Save Terraform State
-        uses: actions/upload-artifact@v3
-        with:
-          name: terraform-state
-          path: s3/terraform.tfstate
-
-      - name: Restore Terraform State
-        uses: actions/download-artifact@v3
-        with:
-          name: terraform-state
-        
-      - name: Move Terraform State
-        run: mv terraform.tfstate s3/
-        
+    - name: Terraform Apply
+      run: |
+        cd s3
+        terraform apply -auto-approve
 
   terratest:
     name: Run Terratest
@@ -68,42 +61,34 @@ jobs:
     needs: terraform
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Download Terraform State
-        uses: actions/download-artifact@v3
-        with:
-          name: terraform-state
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.18'  
 
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: '1.18'
+    - name: Initialize Go module
+      run: |
+        cd test
+        go mod init terraform  
 
-      - name: Install dependencies
-        run: |
-          cd test
-          go mod init terraform
-          go get github.com/gruntwork-io/terratest/modules/aws    
-          go get github.com/gruntwork-io/terratest/modules/terraform
-          go get github.com/stretchr/testify/assert
+    - name: Install dependencies
+      run: |
+        cd test
+        go get github.com/gruntwork-io/terratest/modules/aws    
+        go get github.com/gruntwork-io/terratest/modules/terraform
+        go get github.com/stretchr/testify/assert
 
-      - name: Download Terraform State
-        uses: actions/download-artifact@v3
-        with:
-            name: terraform-state
-  
-      - name: Move Terraform State
-        run: mv terraform.tfstate s3/          
+    - name: Set up AWS credentials
+      run: |
+        echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+        echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+        echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
 
-      - name: Set up AWS credentials
-        run: |
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          echo "AWS_DEFAULT_REGION=us-east-1" >> $GITHUB_ENV
 
-      - name: Run Terratest
-        run: |
-          cd test
-          go test -v
+    - name: Run Terratest
+      run: |
+        cd test
+        go test -v

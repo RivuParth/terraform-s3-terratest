@@ -1,3 +1,5 @@
-bucket_name = "my-terratest-bucket-666666"
+bucket_name = "partha-terratest-4040"
 enable_versioning = true
-
+tags = {
+  "Environment" = "Test"
+}
