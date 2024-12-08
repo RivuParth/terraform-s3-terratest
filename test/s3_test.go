@@ -3,9 +3,6 @@ package test
 import (
 	"testing"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
 )
@@ -13,46 +10,39 @@ import (
 func TestS3BucketModule(t *testing.T) {
 	t.Parallel()
 
-	// Define Terraform options
+	// Define Terraform options with initial variables
 	terraformOptions := &terraform.Options{
-		// Path to the Terraform module
-		TerraformDir: "../s3",
-		// Variables to pass to Terraform
+		TerraformDir: "../s3", // Path to the Terraform code
 		Vars: map[string]interface{}{
-			"bucket_name":      "partha-terratest-505",
-			"enable_versioning": true,
+			"bucket_name":        "partha-terratest-505",
+			"enable_versioning":  true,
 			"tags": map[string]string{
 				"Environment": "Test",
 			},
 		},
-		// Disable color output for readability in logs
-		NoColor: true,
+		NoColor:      true,                // Disable color in Terraform commands
+		PlanFilePath: "./terraform-plan",  // Path to save the Terraform plan file
 	}
 
-	// Ensure cleanup after test
+	// Ensure resources are destroyed at the end of the test
 	defer terraform.Destroy(t, terraformOptions)
 
-	// Initialize and apply the Terraform configuration
-	terraform.InitAndApply(t, terraformOptions)
+	// Initialize and plan Terraform
+	terraform.InitAndPlan(t, terraformOptions)
 
-	// Validate outputs
-	bucketId := terraform.Output(t, terraformOptions, "bucket_id")
-	assert.NotEmpty(t, bucketId, "Bucket ID should not be empty")
-
-	bucketArn := terraform.Output(t, terraformOptions, "bucket_arn")
-	assert.Contains(t, bucketArn, "arn:aws:s3:::"+bucketId, "Bucket ARN should contain the correct bucket ID")
-
-	// Optionally, verify bucket location using AWS SDK
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
+	// Apply the saved plan file
+	terraform.Apply(t, &terraform.Options{
+		TerraformDir:   "../s3",
+		PlanFilePath:   "./terraform-plan", // Apply the saved plan
 	})
-	assert.NoError(t, err, "Failed to create AWS session")
 
-	s3Client := s3.New(sess)
+	// Run validations
+	bucketName := terraform.Output(t, terraformOptions, "bucket_name")
+	assert.Equal(t, "partha-terratest-505", bucketName)
 
-	// Check bucket location
-	_, err = s3Client.GetBucketLocation(&s3.GetBucketLocationInput{
-		Bucket: aws.String(bucketId),
-	})
-	assert.NoError(t, err, "Error checking S3 bucket location")
+	versioningEnabled := terraform.Output(t, terraformOptions, "versioning_enabled")
+	assert.Equal(t, "true", versioningEnabled)
+
+	tags := terraform.OutputMap(t, terraformOptions, "tags")
+	assert.Equal(t, "Test", tags["Environment"])
 }
