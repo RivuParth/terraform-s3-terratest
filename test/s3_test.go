@@ -13,13 +13,13 @@ func TestS3BucketModule(t *testing.T) {
 	// Define Terraform options with initial variables
 	terraformOptions := &terraform.Options{
 		TerraformDir: "../s3", // Path to the Terraform code
-		Vars: map[string]interface{}{
-			"bucket_name":        "partha-terratest-505",
-			"enable_versioning":  true,
-			"tags": map[string]string{
-				"Environment": "Test",
-			},
-		},
+		// Vars: map[string]interface{}{
+		// 	"bucket_name":        "partha-terratest-505",
+		// 	"enable_versioning":  true,
+		// 	"tags": map[string]string{
+		// 		"Environment": "Test",
+		// 	},
+		// },
 		NoColor:      true,                // Disable color in Terraform commands
 		PlanFilePath: "./terraform-plan",  // Path to save the Terraform plan file
 	}
