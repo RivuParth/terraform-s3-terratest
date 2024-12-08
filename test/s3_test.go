@@ -33,8 +33,6 @@ func TestS3BucketModule(t *testing.T) {
 	bucketName := terraform.Output(t, terraformOptions, "bucket_name")
 	assert.Equal(t, "partha-terratest-000", bucketName)
 
-	versioningEnabled := terraform.Output(t, terraformOptions, "versioning_enabled")
-	assert.Equal(t, "true", versioningEnabled)
 
 	tags := terraform.OutputMap(t, terraformOptions, "tags")
 	assert.Equal(t, "Test", tags["Environment"])

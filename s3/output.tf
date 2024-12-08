@@ -9,3 +9,7 @@ output "bucket_arn" {
 output "bucket_name" {
   value = module.s3_bucket.bucket_name
 }
+
+output "versioning_enabled" {
+  value = module.s3_bucket.aws_s3_bucket_versioning.this.enabled
+}
