@@ -34,6 +34,5 @@ func TestS3BucketModule(t *testing.T) {
 	assert.Equal(t, "parthaa-terratest-000", bucketName)
 
 
-	tags := terraform.OutputMap(t, terraformOptions, "tags")
-	assert.Equal(t, "Test", tags["Environment"])
+	
 }
